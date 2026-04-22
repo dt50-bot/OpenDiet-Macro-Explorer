@@ -2,7 +2,7 @@ import os
 import pandas as pd
 
 class DietAnalyzer:
-    def __init__(self, data_path, assumed_servings=4):
+    def __init__(self, data_path, assumed_servings=6):
         """Load and initialize the dataset, creating per-serving columns."""
         self.df = pd.read_csv(data_path)
         self.assumed_servings = assumed_servings
