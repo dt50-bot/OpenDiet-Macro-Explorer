@@ -47,22 +47,30 @@ if __name__ == "__main__":
     print(" Welcome to OpenDiet-Macro-Explorer!")
     print("=============================================\n")
     
-    # Show users what options they have
     diets = analyzer.df['Diet_type'].unique()
     print(f"Supported Diets: {', '.join(diets)}")
     
-    # 1. Get user input for the diet
     user_diet = input("\nEnter a diet type to explore: ").strip().lower()
     
-    # 2. Get user input for the macro
-    print("\nAvailable Macros: Protein(g), Carbs(g), Fat(g)")
-    user_macro = input("Which macro are you targeting? ").strip()
+    print("\nAvailable Macros: Protein, Carbs, Fat")
+    raw_macro = input("Which macro are you targeting? ").strip().lower()
     
-    # 3. Get user input for the minimum amount
+    # --- NEW: Smart Macro Mapping ---
+    # This translates whatever the user types into the exact column name!
+    if 'protein' in raw_macro:
+        user_macro = 'Protein(g)'
+    elif 'carb' in raw_macro:
+        user_macro = 'Carbs(g)'
+    elif 'fat' in raw_macro:
+        user_macro = 'Fat(g)'
+    else:
+        print("\nError: Could not recognize that macro. Defaulting to Protein(g).")
+        user_macro = 'Protein(g)'
+    # --------------------------------
+    
     try:
         user_min = float(input(f"\nEnter the minimum amount of {user_macro} you want: "))
         
-        # Run the analyzer with the user's custom inputs!
         print("\nSearching database...\n")
         custom_results = analyzer.find_culturally_inclusive_meals(
             diet=user_diet, 
@@ -76,6 +84,5 @@ if __name__ == "__main__":
             print(f"--- Top Culturally Inclusive {user_diet.capitalize()} Meals ---")
             print(custom_results.head(10).to_string(index=False))
             
-    except ValueError as e:
-        print(f"\nError: {e}")
-        print("Please make sure you typed the macro exactly (e.g., Protein(g)) and used a number for the amount.")
+    except ValueError:
+        print("\nError: Please make sure you enter a valid number for the amount (e.g., 50 or 30.5).")
