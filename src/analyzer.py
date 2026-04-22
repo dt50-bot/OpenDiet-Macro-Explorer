@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 
 class DietAnalyzer:
@@ -37,18 +38,44 @@ class DietAnalyzer:
         return results[['Recipe_name', 'Cuisine_type', 'Protein(g)', 'Carbs(g)', 'Fat(g)']]
 
 if __name__ == "__main__":
-    # Example Usage
-    analyzer = DietAnalyzer("../data/All_Diets.csv")
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    data_file_path = os.path.join(current_dir, "..", "data", "All_Diets.csv")
     
-    print("--- Average Macros by Diet Type ---")
-    print(analyzer.get_summary_by_diet())
-    print("\n")
+    analyzer = DietAnalyzer(data_file_path)
     
-    print("--- High Protein Vegan Meals Across Diverse Cuisines ---")
-    # Solving the problem of finding high protein (e.g., >30g) vegan meals
-    high_protein_vegan = analyzer.find_culturally_inclusive_meals(
-        diet='vegan', 
-        target_macro='Protein(g)', 
-        min_amount=30.0
-    )
-    print(high_protein_vegan.head(10))
+    print("\n=============================================")
+    print(" Welcome to OpenDiet-Macro-Explorer!")
+    print("=============================================\n")
+    
+    # Show users what options they have
+    diets = analyzer.df['Diet_type'].unique()
+    print(f"Supported Diets: {', '.join(diets)}")
+    
+    # 1. Get user input for the diet
+    user_diet = input("\nEnter a diet type to explore: ").strip().lower()
+    
+    # 2. Get user input for the macro
+    print("\nAvailable Macros: Protein(g), Carbs(g), Fat(g)")
+    user_macro = input("Which macro are you targeting? ").strip()
+    
+    # 3. Get user input for the minimum amount
+    try:
+        user_min = float(input(f"\nEnter the minimum amount of {user_macro} you want: "))
+        
+        # Run the analyzer with the user's custom inputs!
+        print("\nSearching database...\n")
+        custom_results = analyzer.find_culturally_inclusive_meals(
+            diet=user_diet, 
+            target_macro=user_macro, 
+            min_amount=user_min
+        )
+        
+        if custom_results.empty:
+            print("No recipes found matching those criteria. Try adjusting your numbers.")
+        else:
+            print(f"--- Top Culturally Inclusive {user_diet.capitalize()} Meals ---")
+            print(custom_results.head(10).to_string(index=False))
+            
+    except ValueError as e:
+        print(f"\nError: {e}")
+        print("Please make sure you typed the macro exactly (e.g., Protein(g)) and used a number for the amount.")
